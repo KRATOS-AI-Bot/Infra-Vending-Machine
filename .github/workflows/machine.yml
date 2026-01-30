@@ -32,7 +32,7 @@ jobs:
       - name: Terraform Init
         run: |
           cd terraform/S3_Module/
-          terraform init -backend-config="bucket=kratos-statefiles" -backend-config="key=vending-machine/${{ github.event.inputs.bucket_name }}.tfstate" -backend-config="region=ap-south-1"
+          terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ github.event.inputs.bucket_name }}.tfstate" -backend-config="region=ap-south-1"
 
       - name: Terraform Apply
         run: |
