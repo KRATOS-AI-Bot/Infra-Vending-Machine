@@ -6,35 +6,56 @@ on:
     inputs:
       bucket_name:
         description: 'S3 Bucket Name'
-        required: true
+        required: false
+      table_name:
+        description: 'DynamoDB Table Name'
+        required: false
       environment:
         description: 'Environment'
-        required: false
+        required: true
         default: 'dev'
 
 jobs:
-  deploy:
+  deploy-S3:
+    if: 'github.event.inputs.bucket_name != \'\''
     runs-on: ubuntu-latest
+    working-directory: terraform/S3_Module/
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Install Terraform
+      uses: hashicorp/setup-terraform@v3
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: 'ap-south-1'
+    - name: Terraform Init
+      run: |
+        terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ github.event.inputs.bucket_name }}.tfstate" -backend-config="region=ap-south-1"
+    - name: Terraform Apply
+      run: |
+        terraform apply -auto-approve -var="bucket_name=${{ github.event.inputs.bucket_name }}"
 
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'ap-south-1'
-
-      - name: Terraform Init
-        run: |
-          cd terraform/S3_Module/
-          terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ github.event.inputs.bucket_name }}.tfstate" -backend-config="region=ap-south-1"
-
-      - name: Terraform Apply
-        run: |
-          cd terraform/S3_Module/
-          terraform apply -auto-approve -var="bucket_name=${{ github.event.inputs.bucket_name }}"
+  deploy-dynamodb:
+    if: 'github.event.inputs.table_name != \'\''
+    runs-on: ubuntu-latest
+    working-directory: terraform/DynamoDB_Module/
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Install Terraform
+      uses: hashicorp/setup-terraform@v3
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: 'ap-south-1'
+    - name: Terraform Init
+      run: |
+        terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ github.event.inputs.table_name }}.tfstate" -backend-config="region=ap-south-1"
+    - name: Terraform Apply
+      run: |
+        terraform apply -auto-approve -var="table_name=${{ github.event.inputs.table_name }}"
