@@ -12,5 +12,5 @@ output "bucket_region" {
 }
 
 output "versioning_status" {
-  value = aws_s3_bucket_versioning.this.status
+  value = aws_s3_bucket.this.versioning
 }
