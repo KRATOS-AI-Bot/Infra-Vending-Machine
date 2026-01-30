@@ -27,11 +27,5 @@ resource "aws_s3_bucket_public_access_block" "s3_public_access_block" {
 
 resource "aws_s3_bucket_tag" "s3_tags" {
   bucket = aws_s3_bucket.s3_bucket.id
-  dynamic "tag" {
-    for_each = var.tags
-    content {
-      key   = tag.key
-      value = tag.value
-    }
-  }
+  tags = var.tags
 }
