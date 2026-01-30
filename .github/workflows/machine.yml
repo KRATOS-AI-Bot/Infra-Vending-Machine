@@ -16,7 +16,7 @@ on:
       inst_type:
         description: 'EC2 Instance Type'
         required: false
-        default: 't2.micro'
+        default: 't3.micro'
       st_reqd:
         description: 'EC2 Storage Required'
         required: false
