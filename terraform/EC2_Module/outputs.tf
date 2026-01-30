@@ -12,7 +12,7 @@ output "instance_private_ip" {
 }
 
 output "instance_security_group_id" {
-  value = aws_security_group.ec2_instance.id
+  value = aws_security_group.ec2_sg.id
 }
 
 output "instance_type" {
