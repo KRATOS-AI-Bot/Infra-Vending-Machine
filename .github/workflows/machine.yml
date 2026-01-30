@@ -17,7 +17,7 @@ on:
 
 jobs:
   deploy-S3:
-    if: ${{ github.event.inputs.bucket_name != '' }}
+    if: github.event.inputs.bucket_name != ''
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -40,7 +40,7 @@ jobs:
         terraform apply -auto-approve -var="bucket_name=${{ github.event.inputs.bucket_name }}"
 
   deploy-dynamodb:
-    if: ${{ github.event.inputs.table_name != '' }}
+    if: github.event.inputs.table_name != ''
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code

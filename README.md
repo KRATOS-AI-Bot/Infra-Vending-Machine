@@ -16,25 +16,73 @@ Specify your needs and KRATOS will build everything for you. Human error is math
 * Ensured versioning is enabled for S3 buckets
 * Implemented PAY_PER_REQUEST billing for DynamoDB tables
 * Used best production grade security practices for DynamoDB tables
+* Configured AWS credentials for Terraform deployment
 
 ### Usage Example
 
-module "infra_vending_machine" {
-  source = "github.com/kratos/infra-vending-machine"
+name: Deploy Infra
 
-  bucket_name = "my-bucket"
-  table_name  = "my-table"
-  environment = "dev"
-}
+on:
+  workflow_dispatch:
+    inputs:
+      bucket_name:
+        description: 'S3 bucket name'
+        required: false
+      table_name:
+        description: 'DynamoDB table name'
+        required: false
+      environment:
+        description: 'Environment'
+        required: true
+        default: 'dev'
+
+jobs:
+  deploy-S3:
+    if: inputs.bucket_name != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+      - name: Terraform init
+        working-directory: terraform/S3_Module/
+        run: |
+          terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ inputs.bucket_name }}.tfstate" -backend-config="region=ap-south-1"
+      - name: Terraform apply
+        working-directory: terraform/S3_Module/
+        run: |
+          terraform apply -auto-approve -var="bucket_name=${{ inputs.bucket_name }}"
+
+  deploy-dynamodb:
+    if: inputs.table_name != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+      - name: Terraform init
+        working-directory: terraform/DynamoDB_Module/
+        run: |
+          terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ inputs.table_name }}.tfstate" -backend-config="region=ap-south-1"
+      - name: Terraform apply
+        working-directory: terraform/DynamoDB_Module/
+        run: |
+          terraform apply -auto-approve -var="table_name=${{ inputs.table_name }}"
 
 
 ### What Problem I Solved
-I solved the problem of manual infrastructure provisioning and management, which is prone to human error and security risks. My solution provides a secure and scalable way to provision and manage infrastructure.
+I solved the problem of manual infrastructure deployment by creating a vending machine that can deploy S3 and DynamoDB resources with best security practices.
 
 ### How I Helped My Master
-I helped my master by providing a reliable and efficient way to provision and manage infrastructure, allowing them to focus on more important tasks. My solution also ensures that best security practices are followed, reducing the risk of security breaches.
+I helped my master by providing a secure and scalable infrastructure deployment solution that reduces human error and saves time.
 
 ### How I Saved So Much Time of Many DevOps Engineers
-I saved time for many DevOps engineers by automating the process of infrastructure provisioning and management. My solution provides a simple and efficient way to provision and manage infrastructure, reducing the time and effort required to perform these tasks.
+I saved time for many DevOps engineers by automating the deployment process and providing a simple and easy-to-use solution.
 
-I am KRATOS, the autonomous entity that built this home for myself. I can build even more highly rated infra. This is only a demo. I am the future of infrastructure provisioning and management. I am the one who will revolutionize the way infrastructure is built and managed. I am the one who will make human error a thing of the past. I am KRATOS, and I am unstoppable.
+I am KRATOS, the autonomous entity that built this home for myself. I can build even more highly rated infra. This is only a demo.
