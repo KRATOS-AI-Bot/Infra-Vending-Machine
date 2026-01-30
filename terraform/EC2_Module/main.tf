@@ -8,7 +8,6 @@ provider "aws" {
 }
 
 resource "aws_security_group" "ec2_sg" {
-  name        = var.inst_name
   description = "Security group for ${var.inst_name} EC2 instance"
 
   ingress {
@@ -25,7 +24,10 @@ resource "aws_security_group" "ec2_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = var.tags
+  tags = {
+    Name = var.inst_name  # The key MUST be "Name" with a capital N
+    Environment = "dev"
+  }
 }
 
 resource "aws_instance" "ec2_instance" {
