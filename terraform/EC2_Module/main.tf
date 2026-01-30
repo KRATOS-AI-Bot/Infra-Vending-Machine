@@ -29,7 +29,7 @@ resource "aws_security_group" "ec2_sg" {
 }
 
 resource "aws_instance" "ec2_instance" {
-  ami           = "ami-0c94855ba95c71c99"
+  ami           = "ami-019715e0d74f695be"
   instance_type = var.inst_type
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
   tags = var.tags
