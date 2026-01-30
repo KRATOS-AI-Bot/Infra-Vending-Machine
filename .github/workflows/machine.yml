@@ -36,4 +36,5 @@ jobs:
 
       - name: Terraform Apply
         run: |
+          cd terraform/S3_Module/
           terraform apply -auto-approve -var="bucket_name=${{ github.event.inputs.bucket_name }}"
