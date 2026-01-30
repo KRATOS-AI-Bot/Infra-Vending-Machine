@@ -22,7 +22,7 @@ resource "aws_dynamodb_table" "this" {
 
 resource "aws_dynamodb_table_item" "this" {
   table_name = aws_dynamodb_table.this.name
-  hash_key   = aws_dynamodb_table.this.hash_key
+  hash_key  = aws_dynamodb_table.this.hash_key
 
   item = <<ITEM
 {
@@ -32,8 +32,8 @@ ITEM
 }
 
 resource "aws_iam_policy" "this" {
-  name        = "dynamodb-policy"
-  description = "Policy for DynamoDB"
+  name        = "${var.table_name}-policy"
+  description = "Policy for ${var.table_name} DynamoDB table"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -53,8 +53,8 @@ resource "aws_iam_policy" "this" {
 }
 
 resource "aws_iam_role" "this" {
-  name        = "dynamodb-role"
-  description = "Role for DynamoDB"
+  name        = "${var.table_name}-role"
+  description = "Role for ${var.table_name} DynamoDB table"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
