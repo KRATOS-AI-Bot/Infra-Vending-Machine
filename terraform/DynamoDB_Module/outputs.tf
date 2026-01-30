@@ -10,7 +10,3 @@ output "dynamodb_table_id" {
 output "dynamodb_table_name" {
   value = aws_dynamodb_table.this.name
 }
-
-output "dynamodb_table_status" {
-  value = aws_dynamodb_table.this.status
-}
