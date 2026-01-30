@@ -3,7 +3,11 @@ provider "aws" {
   region = "ap-south-1"
 }
 
-resource "aws_dynamodb_table" "this" {
+terraform {
+  backend "s3" {}
+}
+
+resource "aws_dynamodb_table" "table" {
   name           = var.table_name
   billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "id"
@@ -16,9 +20,9 @@ resource "aws_dynamodb_table" "this" {
   tags = var.tags
 }
 
-resource "aws_dynamodb_table_item" "this" {
-  table_name = aws_dynamodb_table.this.name
-  hash_key   = aws_dynamodb_table.this.hash_key
+resource "aws_dynamodb_table_item" "item" {
+  table_name = aws_dynamodb_table.table.name
+  hash_key   = aws_dynamodb_table.table.hash_key
 
   item = <<ITEM
 {
@@ -27,6 +31,10 @@ resource "aws_dynamodb_table_item" "this" {
 ITEM
 }
 
-terraform {
-  backend "s3" {}
+output "table_name" {
+  value = aws_dynamodb_table.table.name
+}
+
+output "table_arn" {
+  value = aws_dynamodb_table.table.arn
 }

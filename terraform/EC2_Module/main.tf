@@ -1,0 +1,51 @@
+
+terraform {
+  backend "s3" {}
+}
+
+provider "aws" {
+  region = "ap-south-1"
+}
+
+resource "aws_security_group" "ec2_sg" {
+  name        = var.inst_name
+  description = "Security group for ${var.inst_name} EC2 instance"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = var.tags
+}
+
+resource "aws_instance" "ec2_instance" {
+  ami           = "ami-0c94855ba95c71c99"
+  instance_type = var.inst_type
+  vpc_security_group_ids = [aws_security_group.ec2_sg.id]
+  tags = var.tags
+}
+
+resource "aws_ebs_volume" "ebs_volume" {
+  count = var.st_reqd > 0 ? 1 : 0
+  availability_zone = "ap-south-1a"
+  size              = var.st_reqd
+  type              = "gp2"
+  tags = var.tags
+}
+
+resource "aws_volume_attachment" "ebs_attach" {
+  count       = var.st_reqd > 0 ? 1 : 0
+  device_name = "/dev/sdh"
+  volume_id   = aws_ebs_volume.ebs_volume[0].id
+  instance_id = aws_instance.ec2_instance.id
+}
