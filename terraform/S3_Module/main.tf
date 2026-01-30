@@ -30,14 +30,3 @@ resource "aws_s3_bucket_public_access_block" "this" {
   ignore_public_acls  = true
   restrict_public_buckets = true
 }
-
-resource "aws_s3_bucket_tagging" "this" {
-  bucket = aws_s3_bucket.this.id
-  dynamic "tag" {
-    for_each = var.tags
-    content {
-      key   = tag.key
-      value = tag.value
-    }
-  }
-}
