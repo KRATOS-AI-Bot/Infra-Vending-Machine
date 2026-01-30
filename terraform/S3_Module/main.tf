@@ -3,9 +3,9 @@ provider "aws" {
   region = "ap-south-1"
 }
 
-resource "aws_s3_bucket" "s3_bucket" {
+resource "aws_s3_bucket" "this" {
   bucket = var.bucket_name
-  tags   = var.tags
+  tags    = var.tags
 
   versioning {
     enabled = true
@@ -20,8 +20,8 @@ resource "aws_s3_bucket" "s3_bucket" {
   }
 }
 
-resource "aws_s3_bucket_public_access_block" "s3_public_access_block" {
-  bucket = aws_s3_bucket.s3_bucket.id
+resource "aws_s3_bucket_public_access_block" "this" {
+  bucket = aws_s3_bucket.this.id
 
   block_public_acls   = true
   block_public_policy = true

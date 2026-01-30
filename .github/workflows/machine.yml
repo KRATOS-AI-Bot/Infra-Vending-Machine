@@ -7,9 +7,10 @@ on:
       bucket_name:
         description: 'S3 Bucket Name'
         required: true
-      tags:
-        description: 'Tags for S3 Bucket'
-        required: true
+      environment:
+        description: 'Environment'
+        required: false
+        default: 'dev'
 
 jobs:
   deploy:
@@ -28,13 +29,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'ap-south-1'
 
-      - name: Initialize and Apply Terraform
+      - name: Terraform Init
         run: |
-          cd terraform/S3_Module
-          terraform init
-          terraform apply -var="bucket_name=${bucket_name}" -var="tags=${tags}" -auto-approve
+          terraform init -backend-config="bucket=kratos-statefiles" -backend-config="key=vending-machine/${{ github.event.inputs.bucket_name }}.tfstate" -backend-config="region=ap-south-1"
 
-      - name: Get Output
+      - name: Terraform Apply
         run: |
-          cd terraform/S3_Module
-          terraform output
+          terraform apply -auto-approve -var="bucket_name=${{ github.event.inputs.bucket_name }}"
