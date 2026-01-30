@@ -1,5 +1,5 @@
 
-output "bucket_id" {
+output "bucket_name" {
   value = aws_s3_bucket.s3_bucket.id
 }
 
@@ -11,6 +11,6 @@ output "bucket_region" {
   value = aws_s3_bucket.s3_bucket.region
 }
 
-output "bucket_name" {
-  value = aws_s3_bucket.s3_bucket.id
+output "versioning_status" {
+  value = aws_s3_bucket.s3_bucket.versioning.enabled
 }

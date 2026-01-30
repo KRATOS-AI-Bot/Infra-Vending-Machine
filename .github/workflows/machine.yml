@@ -1,0 +1,40 @@
+
+name: Infra Vending Machine
+
+on:
+  workflow_dispatch:
+    inputs:
+      bucket_name:
+        description: 'S3 Bucket Name'
+        required: true
+      tags:
+        description: 'Tags for S3 Bucket'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: 'ap-south-1'
+
+      - name: Initialize and Apply Terraform
+        run: |
+          cd terraform/S3_Module
+          terraform init
+          terraform apply -var="bucket_name=${bucket_name}" -var="tags=${tags}" -auto-approve
+
+      - name: Get Output
+        run: |
+          cd terraform/S3_Module
+          terraform output
