@@ -17,9 +17,8 @@ on:
 
 jobs:
   deploy-S3:
-    if: 'github.event.inputs.bucket_name != \'\''
+    if: 'github.event.inputs.bucket_name != '''
     runs-on: ubuntu-latest
-    working-directory: terraform/S3_Module/
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -32,16 +31,17 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: 'ap-south-1'
     - name: Terraform Init
+      working-directory: terraform/S3_Module/
       run: |
         terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ github.event.inputs.bucket_name }}.tfstate" -backend-config="region=ap-south-1"
     - name: Terraform Apply
+      working-directory: terraform/DyanmoDB_Module/
       run: |
         terraform apply -auto-approve -var="bucket_name=${{ github.event.inputs.bucket_name }}"
 
   deploy-dynamodb:
-    if: 'github.event.inputs.table_name != \'\''
+    if: 'github.event.inputs.table_name != '''
     runs-on: ubuntu-latest
-    working-directory: terraform/DynamoDB_Module/
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -54,8 +54,10 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: 'ap-south-1'
     - name: Terraform Init
+      working-directory: terraform/DynamoDB_Module/
       run: |
         terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ github.event.inputs.table_name }}.tfstate" -backend-config="region=ap-south-1"
     - name: Terraform Apply
+      working-directory: terraform/DynamoDB_Module/
       run: |
         terraform apply -auto-approve -var="table_name=${{ github.event.inputs.table_name }}"
