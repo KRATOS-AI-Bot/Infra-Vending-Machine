@@ -7,14 +7,6 @@ provider "aws" {
   region = "ap-south-1"
 }
 
-variable "func_name" {
-  type = string
-}
-
-variable "tags" {
-  type = map(string)
-}
-
 resource "aws_iam_role" "lambda_exec" {
   name        = var.func_name
   description = "Execution role for lambda function"
