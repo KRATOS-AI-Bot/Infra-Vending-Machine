@@ -10,10 +10,21 @@ terraform {
 resource "aws_lambda_function" "lambda" {
   filename      = data.archive_file.lambda.output_path
   function_name = var.func_name
-  handler       = "index.handler"
+  handler       = "index.lambda_handler"
   runtime       = "python3.12"
   role          = aws_iam_role.lambda_exec.arn
   architectures = ["x86_64"]
+}
+
+data "archive_file" "lambda" {
+  type        = "zip"
+  source_file = resource.local_file.placeholder.filename
+  output_path = "${path.module}/lambda_function_payload.zip"
+}
+
+resource "local_file" "placeholder" {
+  filename = "${path.module}/placeholder.py"
+  content  = "def lambda_handler(e, c): print('Hello Kratos')"
 }
 
 resource "aws_iam_role" "lambda_exec" {
@@ -51,10 +62,13 @@ resource "aws_iam_policy" "lambda_policy" {
         Effect    = "Allow"
       },
       {
-        Action = "ses:*"
+        Action = [
+          "ses:SendEmail",
+          "ses:SendRawEmail",
+        ]
         Resource = "*"
         Effect    = "Allow"
-      }
+      },
     ]
   })
 }
@@ -64,15 +78,13 @@ resource "aws_iam_role_policy_attachment" "lambda_attach" {
   policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
-resource "local_file" "placeholder" {
-  filename = "${path.module}/placeholder.py"
-  content  = ""
+variable "func_name" {
+  type = string
 }
 
-data "archive_file" "lambda" {
-  type        = "zip"
-  source_file = local_file.placeholder.filename
-  output_path = "${path.module}/lambda_function_payload.zip"
+variable "tags" {
+  type = map(string)
+  default = {}
 }
 
 output "lambda_arn" {
