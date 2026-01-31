@@ -78,15 +78,6 @@ resource "aws_iam_role_policy_attachment" "lambda_attach" {
   policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
-variable "func_name" {
-  type = string
-}
-
-variable "tags" {
-  type = map(string)
-  default = {}
-}
-
 output "lambda_arn" {
   value = aws_lambda_function.lambda.arn
 }
