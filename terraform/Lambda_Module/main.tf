@@ -75,15 +75,6 @@ data "archive_file" "lambda" {
   output_path = "${path.module}/lambda_function_payload.zip"
 }
 
-variable "func_name" {
-  type = string
-}
-
-variable "tags" {
-  type = map(string)
-  default = {}
-}
-
 output "lambda_arn" {
   value = aws_lambda_function.lambda.arn
 }
