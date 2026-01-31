@@ -59,6 +59,7 @@ resource "aws_iam_role_policy_attachment" "lambda_attach" {
 }
 
 resource "aws_lambda_function" "lambda_func" {
+  filename      = ""
   function_name = var.func_name
   runtime       = "python3.12"
   architectures = ["x86_64"]
