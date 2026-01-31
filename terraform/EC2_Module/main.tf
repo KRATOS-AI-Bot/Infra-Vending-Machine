@@ -34,7 +34,10 @@ resource "aws_instance" "ec2_instance" {
   ami           = "ami-019715e0d74f695be"
   instance_type = var.inst_type
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
-  tags = var.tags
+  tags = {
+    Name = var.inst_name  # The key MUST be "Name" with a capital N
+    Environment = "dev"
+  }
 }
 
 resource "aws_ebs_volume" "ebs_volume" {
