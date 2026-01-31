@@ -1,16 +1,16 @@
 
 output "lambda_function_arn" {
-  value = aws_lambda_function.lambda_function.arn
+  value = aws_lambda_function.this.arn
 }
 
 output "lambda_function_name" {
-  value = aws_lambda_function.lambda_function.function_name
+  value = aws_lambda_function.this.function_name
 }
 
 output "lambda_role_arn" {
   value = aws_iam_role.lambda_exec.arn
 }
 
-output "lambda_function_id" {
-  value = aws_lambda_function.lambda_function.id
+output "lambda_role_name" {
+  value = aws_iam_role.lambda_exec.name
 }
