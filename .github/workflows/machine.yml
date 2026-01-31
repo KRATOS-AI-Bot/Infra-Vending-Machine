@@ -15,16 +15,19 @@ on:
         required: false
       inst_type:
         description: 'EC2 Instance Type'
-        required: false
         default: 't3.micro'
+        required: false
       st_reqd:
         description: 'EC2 Storage Required'
+        default: 8
         required: false
-        default: '8'
+      func_name:
+        description: 'Lambda Function Name'
+        required: false
       environment:
         description: 'Environment'
-        required: false
         default: 'dev'
+        required: false
 
 jobs:
   deploy-S3:
@@ -37,18 +40,12 @@ jobs:
         uses: hashicorp/setup-terraform@v3
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'ap-south-1'
       - name: Terraform Init
-        working-directory: terraform/S3_Module/
-        run: |
-          terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ inputs.bucket_name }}.tfstate" -backend-config="region=ap-south-1"
+        working-directory: terraform/S3_Module
+        run: terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ inputs.bucket_name }}.tfstate" -backend-config="region=ap-south-1"
       - name: Terraform Apply
-        working-directory: terraform/S3_Module/
-        run: |
-          terraform apply -auto-approve -var="bucket_name=${{ inputs.bucket_name }}"
+        working-directory: terraform/S3_Module
+        run: terraform apply -auto-approve -var="bucket_name=${{ inputs.bucket_name }}"
 
   deploy-dynamodb:
     if: inputs.table_name != ''
@@ -60,18 +57,12 @@ jobs:
         uses: hashicorp/setup-terraform@v3
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'ap-south-1'
       - name: Terraform Init
-        working-directory: terraform/DynamoDB_Module/
-        run: |
-          terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ inputs.table_name }}.tfstate" -backend-config="region=ap-south-1"
+        working-directory: terraform/DynamoDB_Module
+        run: terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ inputs.table_name }}.tfstate" -backend-config="region=ap-south-1"
       - name: Terraform Apply
-        working-directory: terraform/DynamoDB_Module/
-        run: |
-          terraform apply -auto-approve -var="table_name=${{ inputs.table_name }}"
+        working-directory: terraform/DynamoDB_Module
+        run: terraform apply -auto-approve -var="table_name=${{ inputs.table_name }}"
 
   deploy-EC2:
     if: inputs.inst_name != ''
@@ -83,15 +74,26 @@ jobs:
         uses: hashicorp/setup-terraform@v3
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'ap-south-1'
       - name: Terraform Init
-        working-directory: terraform/EC2_Module/
-        run: |
-          terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ inputs.inst_name }}.tfstate" -backend-config="region=ap-south-1"
+        working-directory: terraform/EC2_Module
+        run: terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ inputs.inst_name }}.tfstate" -backend-config="region=ap-south-1"
       - name: Terraform Apply
-        working-directory: terraform/EC2_Module/
-        run: |
-          terraform apply -auto-approve -var="inst_name=${{ inputs.inst_name }}" -var="st_reqd=${{ inputs.st_reqd }}" -var="inst_type=${{ inputs.inst_type }}"
+        working-directory: terraform/EC2_Module
+        run: terraform apply -auto-approve -var="inst_name=${{ inputs.inst_name }}" -var="st_reqd=${{ inputs.st_reqd }}" -var="inst_type=${{ inputs.inst_type }}"
+
+  deploy-lambda:
+    if: inputs.func_name != ''
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+      - name: Terraform Init
+        working-directory: terraform/Lambda_Module
+        run: terraform init -backend-config="bucket=kratos-state-files" -backend-config="key=vending-machine/${{ inputs.func_name }}.tfstate" -backend-config="region=ap-south-1"
+      - name: Terraform Apply
+        working-directory: terraform/Lambda_Module
+        run: terraform apply -auto-approve -var="func_name=${{ inputs.func_name }}"
